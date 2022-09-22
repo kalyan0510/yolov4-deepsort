@@ -3,9 +3,9 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import time
 import tensorflow as tf
-physical_devices = tf.config.experimental.list_physical_devices('GPU')
-if len(physical_devices) > 0:
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+gpu_devices = tf.config.experimental.list_physical_devices('GPU')
+for device in gpu_devices:
+  tf.config.experimental.set_memory_growth(device, True)
 from absl import app, flags, logging
 from absl.flags import FLAGS
 import core.utils as utils
@@ -183,7 +183,11 @@ def main(_argv):
 
         # encode yolo detections and feed to tracker
         features = encoder(frame, bboxes)
-        detections = [Detection(bbox, score, class_name, feature) for bbox, score, class_name, feature in zip(bboxes, scores, names, features)]
+        if len(features) is not 0:
+            print(type(features[0][0]))
+            # print((features[0].shape))
+            # print(features[0])
+        detections = [Detection(bbox, score, class_name, np.ones((128))) for bbox, score, class_name, feature in zip(bboxes, scores, names, features)]
 
         #initialize color map
         cmap = plt.get_cmap('tab20b')
